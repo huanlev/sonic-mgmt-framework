@@ -22,12 +22,8 @@ try:
     from sonic_cli_gen.yang_parser import YangParser
 except ImportError as e:
     print(f"Error: Cannot import YangParser from sonic-utilities", file=sys.stderr)
-    print(f"Tried the following paths:", file=sys.stderr)
-    for path in SONIC_UTILITIES_PATHS:
-        if path:
-            exists = "✓" if os.path.exists(path) else "✗"
-            print(f"  {exists} {path}", file=sys.stderr)
-    print(f"\nPlease set SONIC_UTILITIES_PATH environment variable or clone sonic-utilities to one of the above paths.", file=sys.stderr)
+    print(f"Tried path: {SONIC_UTILITIES_PATH}", file=sys.stderr)
+    print(f"\nPlease set SONIC_UTILITIES_PATH environment variable or clone sonic-utilities.", file=sys.stderr)
     print(f"Import error: {e}", file=sys.stderr)
     sys.exit(1)
 
