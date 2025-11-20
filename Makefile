@@ -46,8 +46,27 @@ go-deps: $(GO_DEPS)
 go-deps-clean:
 	$(RM) -r vendor
 
-cli:
+cli: generate-cli
 	$(MAKE) -C CLI
+
+.PHONY: generate-cli
+generate-cli:
+	@echo "Generating CLI from YANG models..."
+	@mkdir -p $(BUILD_DIR)/yang-models
+	@mkdir -p CLI/generated-cli/xml
+	@mkdir -p CLI/generated-cli/scripts
+	@mkdir -p CLI/generated-cli/templates
+	@if [ -d "$(TOPDIR)/../sonic-yang-models/yang-models" ]; then \
+		cp $(TOPDIR)/../sonic-yang-models/yang-models/sonic-flex_counter.yang $(BUILD_DIR)/yang-models/ 2>/dev/null || true; \
+	fi
+	@if [ -f "$(BUILD_DIR)/yang-models/sonic-flex_counter.yang" ]; then \
+		echo "Generating CLI for sonic-flex_counter.yang..."; \
+		python3 $(TOPDIR)/tools/sonic-klish-gen/main.py generate config sonic-flex_counter \
+			--yang-dir $(BUILD_DIR)/yang-models \
+			--output-dir CLI/generated-cli/xml || echo "Warning: CLI generation failed, continuing build"; \
+	else \
+		echo "Warning: sonic-flex_counter.yang not found, skipping CLI generation"; \
+	fi
 
 clitree:
 	TGT_DIR=$(BUILD_DIR)/cli $(MAKE) -C CLI/clitree
