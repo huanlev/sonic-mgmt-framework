@@ -61,6 +61,7 @@ generate-cli:
 	fi
 	@if [ -f "$(BUILD_DIR)/yang-models/sonic-flex_counter.yang" ]; then \
 		echo "Generating CLI for sonic-flex_counter.yang..."; \
+		SONIC_UTILITIES_PATH=$(TOPDIR)/../sonic-utilities PYTHONPATH=$(TOPDIR)/../sonic-utilities:$$PYTHONPATH \
 		python3 $(TOPDIR)/tools/sonic-klish-gen/main.py generate config sonic-flex_counter \
 			--yang-dir $(BUILD_DIR)/yang-models \
 			--output-dir CLI/generated-cli/xml || echo "Warning: CLI generation failed, continuing build"; \

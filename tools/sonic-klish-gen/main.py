@@ -14,16 +14,53 @@ import os
 import argparse
 from pathlib import Path
 
-SONIC_UTILITIES_PATH = '/home/ubuntu/repos/sonic-utilities'
-if os.path.exists(SONIC_UTILITIES_PATH):
-    sys.path.insert(0, SONIC_UTILITIES_PATH)
+
+def find_sonic_utilities():
+    """
+    Find sonic-utilities path by checking environment variable and known locations.
+    
+    Returns:
+        str: Path to sonic-utilities if found, None otherwise
+    """
+    candidates = []
+    
+    if os.environ.get("SONIC_UTILITIES_PATH"):
+        candidates.append(os.environ.get("SONIC_UTILITIES_PATH"))
+    
+    candidates.append("/sonic/src/sonic-utilities")
+    
+    try:
+        repo_root = Path(__file__).resolve().parents[4]  # Go up: main.py -> sonic-klish-gen -> tools -> sonic-mgmt-framework -> src
+        candidates.append(str(repo_root / "sonic-utilities"))
+    except (IndexError, OSError):
+        pass
+    
+    candidates.append("/home/ubuntu/repos/sonic-buildimage/src/sonic-utilities")
+    candidates.append("/home/ubuntu/repos/sonic-utilities")
+    
+    for path in candidates:
+        if path and os.path.exists(path):
+            sonic_cli_gen_path = os.path.join(path, "sonic_cli_gen")
+            if os.path.exists(sonic_cli_gen_path):
+                return path
+    
+    return None
+
+
+sonic_utilities_path = find_sonic_utilities()
+if sonic_utilities_path:
+    sys.path.insert(0, sonic_utilities_path)
+    print(f"Found sonic-utilities at: {sonic_utilities_path}", file=sys.stderr)
 
 try:
     from sonic_cli_gen.yang_parser import YangParser
 except ImportError as e:
     print(f"Error: Cannot import YangParser from sonic-utilities", file=sys.stderr)
-    print(f"Tried path: {SONIC_UTILITIES_PATH}", file=sys.stderr)
-    print(f"\nPlease set SONIC_UTILITIES_PATH environment variable or clone sonic-utilities.", file=sys.stderr)
+    if sonic_utilities_path:
+        print(f"Tried path: {sonic_utilities_path}", file=sys.stderr)
+    else:
+        print(f"Could not find sonic-utilities in any known location", file=sys.stderr)
+    print(f"\nPlease set SONIC_UTILITIES_PATH environment variable or ensure sonic-utilities is available.", file=sys.stderr)
     print(f"Import error: {e}", file=sys.stderr)
     sys.exit(1)
 
