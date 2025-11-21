@@ -2,6 +2,8 @@ Source: sonic-mgmt-framework
 Maintainer: Prabhu Sreenivasan <prabhu.sreenivasan@broadcom.com>
 Build-Depends: debhelper (>= 8.0.0),
                debhelper (>= 10~) | dh-systemd,
+               python3-yang,
+               python3-swsscommon,
 Standards-Version: 3.9.3
 Section: net
 
